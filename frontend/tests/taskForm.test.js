@@ -278,9 +278,9 @@ function testErrorDisplay() {
 }
 
 /**
- * Jalankan semua pengujian
+ * Jalankan semua pengujian Form
  */
-function runTests() {
+function runFormTests() {
   let passed = 0;
   let total = 0;
   
@@ -325,18 +325,24 @@ function runTests() {
   if (testErrorDisplay()) passed++;
   
   console.log(`\nHasil: ${passed}/${total} pengujian berhasil`);
+  return passed === total;
 }
 
 // Jalankan pengujian jika file ini dijalankan langsung
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  // Jalankan dalam browser
-  runTests();
-} else if (typeof module !== 'undefined') {
+if (typeof window !== 'undefined') {
+  window.runFormTests = runFormTests;
+  if (typeof document !== 'undefined' && !document.getElementById('test-results')) {
+    runFormTests();
+  }
+}
+
+if (typeof module !== 'undefined') {
   // Export untuk Node.js
   module.exports = { 
     testFormRendering, 
     testFormValidation, 
     testFormSubmission, 
-    testErrorDisplay 
+    testErrorDisplay,
+    runFormTests
   };
 }

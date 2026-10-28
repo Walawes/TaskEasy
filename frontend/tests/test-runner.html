@@ -63,25 +63,58 @@
   <script src="api.test.js"></script>
   
   <script>
-    document.getElementById('run-all-tests').addEventListener('click', async function() {
-      const resultsDiv = document.getElementById('test-results');
-      resultsDiv.innerHTML = '<h2>Menjalankan Semua Pengujian...</h2>';
-      
-      // Redirect console.log to the results div
-      const originalConsoleLog = console.log;
-      const originalConsoleError = console.error;
+    function createConsoleRedirect(resultsDiv) {
+      const originalLog = console.log;
+      const originalError = console.error;
       
       console.log = function(message) {
         resultsDiv.innerHTML += `<p>${message}</p>`;
-        originalConsoleLog.apply(console, arguments);
+        originalLog.apply(console, arguments);
       };
       
       console.error = function(message) {
         resultsDiv.innerHTML += `<p class="failure">${message}</p>`;
-        originalConsoleError.apply(console, arguments);
+        originalError.apply(console, arguments);
       };
       
-      // Run all tests
+      return function restore() {
+        console.log = originalLog;
+        console.error = originalError;
+      };
+    }
+
+    async function runFormTests() {
+      if (typeof window.runFormTests === 'function') {
+        return await window.runFormTests();
+      } else {
+        console.error('Pengujian form tidak ditemukan');
+        return false;
+      }
+    }
+    
+    async function runListTests() {
+      if (typeof window.runListTests === 'function') {
+        return await window.runListTests();
+      } else {
+        console.error('Pengujian list tidak ditemukan');
+        return false;
+      }
+    }
+    
+    async function runApiTests() {
+      if (typeof window.runApiTests === 'function') {
+        return await window.runApiTests();
+      } else {
+        console.error('Pengujian API tidak ditemukan');
+        return false;
+      }
+    }
+
+    document.getElementById('run-all-tests').addEventListener('click', async function() {
+      const resultsDiv = document.getElementById('test-results');
+      resultsDiv.innerHTML = '<h2>Menjalankan Semua Pengujian...</h2>';
+      const restoreConsole = createConsoleRedirect(resultsDiv);
+      
       try {
         resultsDiv.innerHTML += '<div class="test-group"><h3>Pengujian Form</h3>';
         await runFormTests();
@@ -98,72 +131,54 @@
         resultsDiv.innerHTML += '<h3 class="success">Semua pengujian selesai!</h3>';
       } catch (error) {
         resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      } finally {
+        restoreConsole();
       }
-      
-      // Restore console functions
-      console.log = originalConsoleLog;
-      console.error = originalConsoleError;
     });
     
     document.getElementById('run-form-tests').addEventListener('click', async function() {
       const resultsDiv = document.getElementById('test-results');
       resultsDiv.innerHTML = '<h2>Menjalankan Pengujian Form...</h2>';
+      const restoreConsole = createConsoleRedirect(resultsDiv);
       
-      // Redirect console output
-      const originalConsoleLog = console.log;
-      const originalConsoleError = console.error;
-      
-      console.log = function(message) {
-        resultsDiv.innerHTML += `<p>${message}</p>`;
-        originalConsoleLog.apply(console, arguments);
-      };
-      
-      console.error = function(message) {
-        resultsDiv.innerHTML += `<p class="failure">${message}</p>`;
-        originalConsoleError.apply(console, arguments);
-      };
-      
-      // Run form tests
       try {
         await runFormTests();
         resultsDiv.innerHTML += '<h3 class="success">Pengujian Form selesai!</h3>';
       } catch (error) {
         resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      } finally {
+        restoreConsole();
       }
-      
-      // Restore console functions
-      console.log = originalConsoleLog;
-      console.error = originalConsoleError;
     });
-    
-    // Add similar event listeners for other test buttons
-    
-    async function runFormTests() {
-      // Run form tests
-      if (typeof runTests !== 'undefined' && typeof testFormRendering !== 'undefined') {
-        await runTests();
-      } else {
-        console.error('Pengujian form tidak ditemukan');
+
+    document.getElementById('run-list-tests').addEventListener('click', async function() {
+      const resultsDiv = document.getElementById('test-results');
+      resultsDiv.innerHTML = '<h2>Menjalankan Pengujian List...</h2>';
+      const restoreConsole = createConsoleRedirect(resultsDiv);
+      
+      try {
+        await runListTests();
+        resultsDiv.innerHTML += '<h3 class="success">Pengujian List selesai!</h3>';
+      } catch (error) {
+        resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      } finally {
+        restoreConsole();
       }
-    }
-    
-    async function runListTests() {
-      // Run list tests
-      if (typeof runTests !== 'undefined' && typeof testTaskListRendering !== 'undefined') {
-        await runTests();
-      } else {
-        console.error('Pengujian list tidak ditemukan');
+    });
+
+    document.getElementById('run-api-tests').addEventListener('click', async function() {
+      const resultsDiv = document.getElementById('test-results');
+      resultsDiv.innerHTML = '<h2>Menjalankan Pengujian API...</h2>';
+      const restoreConsole = createConsoleRedirect(resultsDiv);
+      
+      try {
+        await runApiTests();
+        resultsDiv.innerHTML += '<h3 class="success">Pengujian API selesai!</h3>';
+      } catch (error) {
+        resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      } finally {
+        restoreConsole();
       }
-    }
-    
-    async function runApiTests() {
-      // Run API tests
-      if (typeof runTests !== 'undefined' && typeof testGetAllTasks !== 'undefined') {
-        await runTests();
-      } else {
-        console.error('Pengujian API tidak ditemukan');
-      }
-    }
-  </script>
+    });
 </body>
 </html>

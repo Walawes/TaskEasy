@@ -371,9 +371,9 @@ function testEditModal() {
 }
 
 /**
- * Jalankan semua pengujian
+ * Jalankan semua pengujian List
  */
-async function runTests() {
+async function runListTests() {
   let passed = 0;
   let total = 0;
   
@@ -515,19 +515,25 @@ async function runTests() {
   if (await testEditModal()) passed++;
   
   console.log(`\nHasil: ${passed}/${total} pengujian berhasil`);
+  return passed === total;
 }
 
 // Jalankan pengujian jika file ini dijalankan langsung
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-  // Jalankan dalam browser
-  runTests();
-} else if (typeof module !== 'undefined') {
+if (typeof window !== 'undefined') {
+  window.runListTests = runListTests;
+  if (typeof document !== 'undefined' && !document.getElementById('test-results')) {
+    runListTests();
+  }
+}
+
+if (typeof module !== 'undefined') {
   // Export untuk Node.js
   module.exports = { 
     testTaskListRendering, 
     testStatusFilter, 
     testSearch, 
     testEmptyTaskList,
-    testEditModal
+    testEditModal,
+    runListTests
   };
 }
