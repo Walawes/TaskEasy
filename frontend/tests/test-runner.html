@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskEasy - Test Runner</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+    }
+    .test-results {
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .success {
+      color: green;
+    }
+    .failure {
+      color: red;
+    }
+    .test-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TaskEasy - Test Runner</h1>
+    <p>Halaman ini menjalankan pengujian untuk komponen-komponen TaskEasy</p>
+    
+    <div class="test-controls mb-4">
+      <button id="run-all-tests" class="btn btn-primary">Jalankan Semua Pengujian</button>
+      <button id="run-form-tests" class="btn btn-outline-primary">Pengujian Form</button>
+      <button id="run-list-tests" class="btn btn-outline-primary">Pengujian List</button>
+      <button id="run-api-tests" class="btn btn-outline-primary">Pengujian API</button>
+    </div>
+    
+    <div id="test-results" class="test-results">
+      <p>Klik tombol di atas untuk menjalankan pengujian.</p>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Load source files -->
+  <script src="../js/api.js"></script>
+  <script src="../js/taskForm.js"></script>
+  <script src="../js/taskList.js"></script>
+  
+  <!-- Load test files -->
+  <script src="taskForm.test.js"></script>
+  <script src="taskList.test.js"></script>
+  <script src="api.test.js"></script>
+  
+  <script>
+    document.getElementById('run-all-tests').addEventListener('click', async function() {
+      const resultsDiv = document.getElementById('test-results');
+      resultsDiv.innerHTML = '<h2>Menjalankan Semua Pengujian...</h2>';
+      
+      // Redirect console.log to the results div
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+      
+      console.log = function(message) {
+        resultsDiv.innerHTML += `<p>${message}</p>`;
+        originalConsoleLog.apply(console, arguments);
+      };
+      
+      console.error = function(message) {
+        resultsDiv.innerHTML += `<p class="failure">${message}</p>`;
+        originalConsoleError.apply(console, arguments);
+      };
+      
+      // Run all tests
+      try {
+        resultsDiv.innerHTML += '<div class="test-group"><h3>Pengujian Form</h3>';
+        await runFormTests();
+        resultsDiv.innerHTML += '</div>';
+        
+        resultsDiv.innerHTML += '<div class="test-group"><h3>Pengujian List</h3>';
+        await runListTests();
+        resultsDiv.innerHTML += '</div>';
+        
+        resultsDiv.innerHTML += '<div class="test-group"><h3>Pengujian API</h3>';
+        await runApiTests();
+        resultsDiv.innerHTML += '</div>';
+        
+        resultsDiv.innerHTML += '<h3 class="success">Semua pengujian selesai!</h3>';
+      } catch (error) {
+        resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      }
+      
+      // Restore console functions
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
+    });
+    
+    document.getElementById('run-form-tests').addEventListener('click', async function() {
+      const resultsDiv = document.getElementById('test-results');
+      resultsDiv.innerHTML = '<h2>Menjalankan Pengujian Form...</h2>';
+      
+      // Redirect console output
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+      
+      console.log = function(message) {
+        resultsDiv.innerHTML += `<p>${message}</p>`;
+        originalConsoleLog.apply(console, arguments);
+      };
+      
+      console.error = function(message) {
+        resultsDiv.innerHTML += `<p class="failure">${message}</p>`;
+        originalConsoleError.apply(console, arguments);
+      };
+      
+      // Run form tests
+      try {
+        await runFormTests();
+        resultsDiv.innerHTML += '<h3 class="success">Pengujian Form selesai!</h3>';
+      } catch (error) {
+        resultsDiv.innerHTML += `<p class="failure">Error: ${error.message}</p>`;
+      }
+      
+      // Restore console functions
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
+    });
+    
+    // Add similar event listeners for other test buttons
+    
+    async function runFormTests() {
+      // Run form tests
+      if (typeof runTests !== 'undefined' && typeof testFormRendering !== 'undefined') {
+        await runTests();
+      } else {
+        console.error('Pengujian form tidak ditemukan');
+      }
+    }
+    
+    async function runListTests() {
+      // Run list tests
+      if (typeof runTests !== 'undefined' && typeof testTaskListRendering !== 'undefined') {
+        await runTests();
+      } else {
+        console.error('Pengujian list tidak ditemukan');
+      }
+    }
+    
+    async function runApiTests() {
+      // Run API tests
+      if (typeof runTests !== 'undefined' && typeof testGetAllTasks !== 'undefined') {
+        await runTests();
+      } else {
+        console.error('Pengujian API tidak ditemukan');
+      }
+    }
+  </script>
+</body>
+</html>
